@@ -4,21 +4,17 @@ class ElevatorOperator {
 	elevators: Elevator[];
 
 	constructor(elevatorCount: number) {
-		elevatorCount = (elevatorCount && typeof elevatorCount === 'number')
-							? elevatorCount 
-							: 1;
 		this.requests = [];
 		this.elevators = Array.apply(this, new Array(elevatorCount))
-			.map(function(i, ndx: number){return new Elevator(ndx)});
+			.map((i, ndx: number) => new Elevator(ndx));
 	}
 
 	start() {
-		this.elevators.forEach((function(elevator){
-					this.requests = elevator.takeTurn(this.requests);
-				}).bind(this));		
+		this.elevators.forEach(((elevator: Elevator) => this.requests = elevator.takeTurn(this.requests)).bind(this));		
 
 		setTimeout(this.start.bind(this), 2000);
 	}
+
 
 	addRequest(request) {
 		this.requests.push(request);
@@ -38,13 +34,11 @@ class Elevator {
 		this.number = number;
 	}
 
-	takeTurn(requests) {
+	takeTurn(requests): number[] {
 
 		//filter out requests already queued
 		if(this.destinations.length > 0)
-			this.destinations.forEach((function(r){
-				requests = this.filterRequests(requests, r);
-			}).bind(this));
+			this.destinations.forEach(((r: number) => requests = this.filterRequests(requests, r) ).bind(this));
 
 		//add new requests
 		requests = this.addDestination(requests);
@@ -56,7 +50,7 @@ class Elevator {
 		return requests;
 	}
 
-	addDestination(requests) {
+	addDestination(requests): number[] {
 
 		if(requests.length > 0) {
 
@@ -89,16 +83,16 @@ class Elevator {
 		return [];
 	}
 
-	solveNextDirecion(requests) {
+	solveNextDirecion(requests): number[] {
 		//figure out if there are more requests higher or lower than current floor
-		var higher = requests.filter((function(r){ return r > this.cur; }).bind(this)),
-			lower = requests.filter((function(r){ return r < this.cur; }).bind(this)),
+		var higher = requests.filter(((r) => r > this.cur).bind(this)),
+			lower = requests.filter(((r) => r < this.cur).bind(this)),
 			up = true;
 
 		//if there is a destination we only care about the ones leading up to it
 		if(this.destinations.length > 0) {
-			higher = higher.filter((function(r){ return r < this.destinations[0]; }).bind(this));
-			lower = lower.filter((function(r){ return r > this.destinations[0]; }).bind(this));
+			higher = higher.filter(((r) => r < this.destinations[0]).bind(this));
+			lower = lower.filter(((r) => r > this.destinations[0]).bind(this));
 			up  = this.cur < this.destinations[0];
 		}
 		else
@@ -118,8 +112,8 @@ class Elevator {
 		return requests;
 	}
 
-	solveHigher(requests) {
-		var higher = requests.filter((function(r){ return r > this.cur && r < this.destinations[0]; }).bind(this));
+	solveHigher(requests): number[] {
+		var higher = requests.filter(((r) => r > this.cur && r < this.destinations[0]).bind(this));
 
 		if(higher.length > 0) {
 			this.destinations.unshift(higher.sort().pop());
@@ -130,8 +124,8 @@ class Elevator {
 		return requests;
 	}
 
-	solveLower(requests) {
-		var lower = requests.filter((function(r){ return r < this.cur && r > this.destinations[0]; }).bind(this));
+	solveLower(requests): number[] {
+		var lower = requests.filter(((r) => r < this.cur && r > this.destinations[0]).bind(this));
 
 		if(lower.length > 0) {
 			this.destinations.unshift(lower.sort().shift());
@@ -142,16 +136,16 @@ class Elevator {
 		return requests;
 	}
 
-	holdDoor(requests) {
+	holdDoor(requests): number[] {
 		this.destinations.unshift(this.cur);
 		return this.filterRequests(requests, this.cur);
 	}
 
-	filterRequests(requests, floor) {
-		return requests.filter(function(r){ return r !== floor; });
+	filterRequests(requests, floor): number[] {
+		return requests.filter((r) => r !== floor);
 	}
 
-	workTowardsGoal() {
+	workTowardsGoal(): void {
 		if(this.destinations.length > 0){
 			if(this.cur === this.destinations[0])
 				this.openDoors();
@@ -166,7 +160,7 @@ class Elevator {
 			this.wait();
 	}
 
-	openDoors() {
+	openDoors(): void {
 		if(this.doorOpen) {
 			//we have another request for this floor and will wait a bit
 			console.log(". . . Another request on floor "+ this.cur + ". Elevator " + this.number + " Waiting . . .")
@@ -179,19 +173,19 @@ class Elevator {
 		this.destinations.shift();
 	}
 
-	closeDoors() {
+	closeDoors(): void {
 		console.log("Elevator " + this.number + " is closing doors on " + this.cur);
 		this.doorOpen = false;
 	}
 
-	move() {
+	move(): void {
 		console.log((this.cur > this.destinations[0]) ?
 			"Elevator " + this.number + " is moving from " + this.cur + " to " + --this.cur + " towards " + this.destinations[0]:
 			"Elevator " + this.number + " is moving from " + this.cur + " to " + ++this.cur + " towards " + this.destinations[0]
 		);
 	}
 
-	wait() {
+	wait(): void {
 		console.log(". . . Elevator " + this.number + " waiting on floor " + this.cur + " . . .");
 	}
 
@@ -205,15 +199,11 @@ class Elevator {
 	var inpFloor = <HTMLSelectElement>document.querySelector('.request-floor-input');
 	var inpDest = <HTMLSelectElement>document.querySelector('.request-destination-input');
 
-	btnReq.addEventListener('click', function() {
-		eo.addRequest(<any>inpFloor.value * 1);//*1 is for coercion 
-	});
+	btnReq.addEventListener('click', () => eo.addRequest(<any>inpFloor.value * 1));
 
-	btnDest.addEventListener('click', function() {
-		eo.addRequest(<any>inpDest.value * 1); //*1 is for coercion
-	});
+	btnDest.addEventListener('click', ()=> eo.addRequest(<any>inpDest.value * 1));
 
-	btnBoth.addEventListener('click', function() {
+	btnBoth.addEventListener('click', () => {
 		eo.addRequest(<any>inpFloor.value * 1);//*1 is for coercion
 		eo.addRequest(<any>inpDest.value * 1);
 	});

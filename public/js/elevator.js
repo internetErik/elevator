@@ -1,16 +1,12 @@
 var ElevatorOperator = (function () {
     function ElevatorOperator(elevatorCount) {
-        elevatorCount = (elevatorCount && typeof elevatorCount === 'number')
-            ? elevatorCount
-            : 1;
         this.requests = [];
         this.elevators = Array.apply(this, new Array(elevatorCount))
             .map(function (i, ndx) { return new Elevator(ndx); });
     }
     ElevatorOperator.prototype.start = function () {
-        this.elevators.forEach((function (elevator) {
-            this.requests = elevator.takeTurn(this.requests);
-        }).bind(this));
+        var _this = this;
+        this.elevators.forEach((function (elevator) { return _this.requests = elevator.takeTurn(_this.requests); }).bind(this));
         setTimeout(this.start.bind(this), 2000);
     };
     ElevatorOperator.prototype.addRequest = function (request) {
@@ -26,11 +22,10 @@ var Elevator = (function () {
         this.number = number;
     }
     Elevator.prototype.takeTurn = function (requests) {
+        var _this = this;
         //filter out requests already queued
         if (this.destinations.length > 0)
-            this.destinations.forEach((function (r) {
-                requests = this.filterRequests(requests, r);
-            }).bind(this));
+            this.destinations.forEach((function (r) { return requests = _this.filterRequests(requests, r); }).bind(this));
         //add new requests
         requests = this.addDestination(requests);
         // console.log("Elevator: " + this.number + " Requests:", requests, " destinations:", this.destinations);
@@ -63,12 +58,13 @@ var Elevator = (function () {
         return [];
     };
     Elevator.prototype.solveNextDirecion = function (requests) {
+        var _this = this;
         //figure out if there are more requests higher or lower than current floor
-        var higher = requests.filter((function (r) { return r > this.cur; }).bind(this)), lower = requests.filter((function (r) { return r < this.cur; }).bind(this)), up = true;
+        var higher = requests.filter((function (r) { return r > _this.cur; }).bind(this)), lower = requests.filter((function (r) { return r < _this.cur; }).bind(this)), up = true;
         //if there is a destination we only care about the ones leading up to it
         if (this.destinations.length > 0) {
-            higher = higher.filter((function (r) { return r < this.destinations[0]; }).bind(this));
-            lower = lower.filter((function (r) { return r > this.destinations[0]; }).bind(this));
+            higher = higher.filter((function (r) { return r < _this.destinations[0]; }).bind(this));
+            lower = lower.filter((function (r) { return r > _this.destinations[0]; }).bind(this));
             up = this.cur < this.destinations[0];
         }
         else
@@ -84,7 +80,8 @@ var Elevator = (function () {
         return requests;
     };
     Elevator.prototype.solveHigher = function (requests) {
-        var higher = requests.filter((function (r) { return r > this.cur && r < this.destinations[0]; }).bind(this));
+        var _this = this;
+        var higher = requests.filter((function (r) { return r > _this.cur && r < _this.destinations[0]; }).bind(this));
         if (higher.length > 0) {
             this.destinations.unshift(higher.sort().pop());
             requests = this.filterRequests(requests, this.destinations[0]);
@@ -92,7 +89,8 @@ var Elevator = (function () {
         return requests;
     };
     Elevator.prototype.solveLower = function (requests) {
-        var lower = requests.filter((function (r) { return r < this.cur && r > this.destinations[0]; }).bind(this));
+        var _this = this;
+        var lower = requests.filter((function (r) { return r < _this.cur && r > _this.destinations[0]; }).bind(this));
         if (lower.length > 0) {
             this.destinations.unshift(lower.sort().shift());
             requests = this.filterRequests(requests, this.destinations[0]);
@@ -151,12 +149,8 @@ var Elevator = (function () {
     var btnBoth = document.querySelector('.btn-both');
     var inpFloor = document.querySelector('.request-floor-input');
     var inpDest = document.querySelector('.request-destination-input');
-    btnReq.addEventListener('click', function () {
-        eo.addRequest(inpFloor.value * 1); //*1 is for coercion 
-    });
-    btnDest.addEventListener('click', function () {
-        eo.addRequest(inpDest.value * 1); //*1 is for coercion
-    });
+    btnReq.addEventListener('click', function () { return eo.addRequest(inpFloor.value * 1); });
+    btnDest.addEventListener('click', function () { return eo.addRequest(inpDest.value * 1); });
     btnBoth.addEventListener('click', function () {
         eo.addRequest(inpFloor.value * 1); //*1 is for coercion
         eo.addRequest(inpDest.value * 1);
