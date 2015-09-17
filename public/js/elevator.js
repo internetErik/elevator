@@ -1,14 +1,33 @@
 var ElevatorOperator = (function () {
     function ElevatorOperator(elevatorCount) {
         var _this = this;
+        /**
+         * start
+         *
+         * This kicks off the elevator operator once it has been initialized
+         *
+         * Essentially loops through all elevators and passes them the list of results
+         * Each elevator determines for itself if any of the requests can be picked up by it
+         *
+         * @type {[type]}
+         */
         this.start = function () {
-            _this.elevators.forEach(function (elevator) { return _this.requests = elevator.takeTurn(_this.requests); });
+            _this.elevators.forEach(function (elevator) {
+                return _this.requests = elevator.takeTurn(_this.requests);
+            });
             setTimeout(_this.start, 2000);
         };
         this.requests = [];
         this.elevators = Array.apply(this, new Array(elevatorCount))
             .map(function (i, ndx) { return new Elevator(ndx); });
     }
+    /**
+     * addRequest
+     *
+     * Function used to add request(s) to the list.
+     *
+     * @param {[type]} ...requests array of numbers
+     */
     ElevatorOperator.prototype.addRequest = function () {
         var requests = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -25,6 +44,17 @@ var Elevator = (function () {
         this.destinations = [];
         this.number = number;
     }
+    /**
+     * takeTurn
+     *
+     * Every round, elevators receive a list of requests one at a time
+     * and each elevator determines if there is a request that it makes sense for it to take
+     *
+     * If an elevator has no destinations it is working towards, then it will always take an available request
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.takeTurn = function (requests) {
         var _this = this;
         //filter out requests already queued
@@ -36,6 +66,16 @@ var Elevator = (function () {
         this.workTowardsGoal();
         return requests;
     };
+    /**
+     * addDestination
+     *
+     * See if any of the current requests are relevant to us
+     *
+     * If there is a relevant result, add 1 to destinations
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.addDestination = function (requests) {
         if (requests.length > 0) {
             //we either have current destinations or not
@@ -62,6 +102,16 @@ var Elevator = (function () {
         //if none of our conditions were met, we still need to return requests
         return [];
     };
+    /**
+     * solveNextDirection
+     *
+     * When we are in need of another request to handle, we take one that makes sense to us
+     *
+     * Our criteria depends on if there are more requests above or below us
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.solveNextDirecion = function (requests) {
         var _this = this;
         //figure out if there are more requests higher or lower than current floor
@@ -84,6 +134,16 @@ var Elevator = (function () {
         }
         return requests;
     };
+    /**
+     * solveHigher
+     *
+     * See if there are requests that are between our current floor and our destination as we are going up
+     *
+     * If there are, we should take 1
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.solveHigher = function (requests) {
         var _this = this;
         var higher = requests.filter(function (r) { return r > _this.cur && r < _this.destinations[0]; });
@@ -93,6 +153,16 @@ var Elevator = (function () {
         }
         return requests;
     };
+    /**
+     * solveLower
+     *
+     * See if there are requests that are between our current floor and our destination as we are going down
+     *
+     * If there are, we should take 1
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.solveLower = function (requests) {
         var _this = this;
         var lower = requests.filter(function (r) { return r < _this.cur && r > _this.destinations[0]; });
@@ -102,10 +172,27 @@ var Elevator = (function () {
         }
         return requests;
     };
+    /**
+     * holdDoor
+     *
+     * We have a new request on the floor we are at.
+     *
+     * Wait, and then filter our all other requests on that floor
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.holdDoor = function (requests) {
         this.destinations.unshift(this.cur);
         return this.filterRequests(requests, this.cur);
     };
+    /**
+     * filterRequests
+     *
+     * @param  {number[]}   requests 	the requests we are handling
+     * @param  {number}   floor         the number of the floor we are filtering out
+     * @return {number[]}   			the requests to overwrite the original array
+     */
     Elevator.prototype.filterRequests = function (requests, floor) {
         return requests.filter(function (r) { return r !== floor; });
     };
@@ -123,6 +210,14 @@ var Elevator = (function () {
         else
             this.wait();
     };
+    /**
+     * openDoors
+     *
+     * Open the door or hold door.
+     *
+     * if we are opening the door, set doorOpen
+     * After that, remove the destination from our list
+     */
     Elevator.prototype.openDoors = function () {
         if (this.doorOpen) {
             //we have another request for this floor and will wait a bit
@@ -135,6 +230,11 @@ var Elevator = (function () {
         //this is the only location we remove elements from destinations
         this.destinations.shift();
     };
+    /**
+     * closeDoors
+     *
+     * Close the door, and set the doorOpen flag
+     */
     Elevator.prototype.closeDoors = function () {
         console.log("Elevator " + this.number + " is closing doors on this.cur");
         this.doorOpen = false;
@@ -148,6 +248,7 @@ var Elevator = (function () {
     return Elevator;
 })();
 (function () {
+    //cache the current interface
     var btnReq = document.querySelector('.btn-request');
     var btnDest = document.querySelector('.btn-destination');
     var btnBoth = document.querySelector('.btn-both');
