@@ -9,10 +9,10 @@ class ElevatorOperator {
 			.map((i, ndx: number) => new Elevator(ndx));
 	}
 
-	start() {
-		this.elevators.forEach(((elevator: Elevator) => this.requests = elevator.takeTurn(this.requests)).bind(this));		
+	start = () => {
+		this.elevators.forEach((elevator: Elevator) => this.requests = elevator.takeTurn(this.requests));		
 
-		setTimeout(this.start.bind(this), 2000);
+		setTimeout(this.start, 2000);
 	}
 
 	addRequest(...requests) {
@@ -37,7 +37,7 @@ class Elevator {
 
 		//filter out requests already queued
 		if(this.destinations.length > 0)
-			this.destinations.forEach(((r: number) => requests = this.filterRequests(requests, r) ).bind(this));
+			this.destinations.forEach((r: number) => requests = this.filterRequests(requests, r));
 
 		//add new requests
 		requests = this.addDestination(requests);
@@ -85,14 +85,14 @@ class Elevator {
 
 	solveNextDirecion(requests): number[] {
 		//figure out if there are more requests higher or lower than current floor
-		var higher = requests.filter(((r) => r > this.cur).bind(this)),
-			lower = requests.filter(((r) => r < this.cur).bind(this)),
+		var higher = requests.filter((r) => r > this.cur),
+			lower = requests.filter((r) => r < this.cur),
 			up = true;
 
 		//if there is a destination we only care about the ones leading up to it
 		if(this.destinations.length > 0) {
-			higher = higher.filter(((r) => r < this.destinations[0]).bind(this));
-			lower = lower.filter(((r) => r > this.destinations[0]).bind(this));
+			higher = higher.filter((r) => r < this.destinations[0]);
+			lower = lower.filter((r) => r > this.destinations[0]);
 			up  = this.cur < this.destinations[0];
 		}
 		else
@@ -113,7 +113,7 @@ class Elevator {
 	}
 
 	solveHigher(requests): number[] {
-		var higher = requests.filter(((r) => r > this.cur && r < this.destinations[0]).bind(this));
+		var higher = requests.filter((r) => r > this.cur && r < this.destinations[0]);
 
 		if(higher.length > 0) {
 			this.destinations.unshift(higher.sort().pop());
@@ -125,7 +125,7 @@ class Elevator {
 	}
 
 	solveLower(requests): number[] {
-		var lower = requests.filter(((r) => r < this.cur && r > this.destinations[0]).bind(this));
+		var lower = requests.filter((r) => r < this.cur && r > this.destinations[0]);
 
 		if(lower.length > 0) {
 			this.destinations.unshift(lower.sort().shift());
