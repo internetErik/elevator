@@ -9,8 +9,12 @@ var ElevatorOperator = (function () {
         this.elevators.forEach((function (elevator) { return _this.requests = elevator.takeTurn(_this.requests); }).bind(this));
         setTimeout(this.start.bind(this), 2000);
     };
-    ElevatorOperator.prototype.addRequest = function (request) {
-        this.requests.push(request);
+    ElevatorOperator.prototype.addRequest = function () {
+        var requests = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            requests[_i - 0] = arguments[_i];
+        }
+        this.requests.push.apply(this.requests, requests);
     };
     return ElevatorOperator;
 })();
@@ -28,7 +32,7 @@ var Elevator = (function () {
             this.destinations.forEach((function (r) { return requests = _this.filterRequests(requests, r); }).bind(this));
         //add new requests
         requests = this.addDestination(requests);
-        // console.log("Elevator: " + this.number + " Requests:", requests, " destinations:", this.destinations);
+        // console.log(`Elevator: ${this.number} Requests: ${requests}, destinations: ${this.destinations}`);
         this.workTowardsGoal();
         return requests;
     };
@@ -55,6 +59,7 @@ var Elevator = (function () {
                     return this.solveNextDirecion(requests);
             }
         }
+        //if none of our conditions were met, we still need to return requests
         return [];
     };
     Elevator.prototype.solveNextDirecion = function (requests) {
@@ -127,16 +132,15 @@ var Elevator = (function () {
             console.log("Elevator " + this.number + " is opening doors on floor " + this.cur);
             this.doorOpen = true;
         }
+        //this is the only location we remove elements from destinations
         this.destinations.shift();
     };
     Elevator.prototype.closeDoors = function () {
-        console.log("Elevator " + this.number + " is closing doors on " + this.cur);
+        console.log("Elevator " + this.number + " is closing doors on this.cur");
         this.doorOpen = false;
     };
     Elevator.prototype.move = function () {
-        console.log((this.cur > this.destinations[0]) ?
-            "Elevator " + this.number + " is moving from " + this.cur + " to " + --this.cur + " towards " + this.destinations[0] :
-            "Elevator " + this.number + " is moving from " + this.cur + " to " + ++this.cur + " towards " + this.destinations[0]);
+        console.log("Elevator " + this.number + " is moving from " + this.cur + " to " + ((this.cur > this.destinations[0]) ? --this.cur : ++this.cur) + " towards " + this.destinations[0]);
     };
     Elevator.prototype.wait = function () {
         console.log(". . . Elevator " + this.number + " waiting on floor " + this.cur + " . . .");
@@ -152,8 +156,7 @@ var Elevator = (function () {
     btnReq.addEventListener('click', function () { return eo.addRequest(inpFloor.value * 1); });
     btnDest.addEventListener('click', function () { return eo.addRequest(inpDest.value * 1); });
     btnBoth.addEventListener('click', function () {
-        eo.addRequest(inpFloor.value * 1); //*1 is for coercion
-        eo.addRequest(inpDest.value * 1);
+        eo.addRequest(inpFloor.value * 1, inpDest.value * 1); //*1 is for coercion
     });
     var eo = new ElevatorOperator(1);
     eo.start();

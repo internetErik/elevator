@@ -15,9 +15,8 @@ class ElevatorOperator {
 		setTimeout(this.start.bind(this), 2000);
 	}
 
-
-	addRequest(request) {
-		this.requests.push(request);
+	addRequest(...requests) {
+		this.requests.push.apply(this.requests, requests);
 	}
 }
 
@@ -43,7 +42,7 @@ class Elevator {
 		//add new requests
 		requests = this.addDestination(requests);
 
-		// console.log("Elevator: " + this.number + " Requests:", requests, " destinations:", this.destinations);
+		// console.log(`Elevator: ${this.number} Requests: ${requests}, destinations: ${this.destinations}`);
 
 		this.workTowardsGoal();
 
@@ -80,6 +79,7 @@ class Elevator {
 			}
 
 		}
+		//if none of our conditions were met, we still need to return requests
 		return [];
 	}
 
@@ -161,32 +161,30 @@ class Elevator {
 	}
 
 	openDoors(): void {
-		if(this.doorOpen) {
+		if (this.doorOpen) {
 			//we have another request for this floor and will wait a bit
-			console.log(". . . Another request on floor "+ this.cur + ". Elevator " + this.number + " Waiting . . .")
+			console.log(`. . . Another request on floor ${this.cur}. Elevator ${this.number} Waiting . . .`);
 		}
 		else {
-			console.log("Elevator " + this.number + " is opening doors on floor " + this.cur);
+			console.log(`Elevator ${this.number} is opening doors on floor ${this.cur}`);
 			this.doorOpen = true;
 		}
 
+		//this is the only location we remove elements from destinations
 		this.destinations.shift();
 	}
 
 	closeDoors(): void {
-		console.log("Elevator " + this.number + " is closing doors on " + this.cur);
+		console.log(`Elevator ${this.number} is closing doors on this.cur`);
 		this.doorOpen = false;
 	}
 
 	move(): void {
-		console.log((this.cur > this.destinations[0]) ?
-			"Elevator " + this.number + " is moving from " + this.cur + " to " + --this.cur + " towards " + this.destinations[0]:
-			"Elevator " + this.number + " is moving from " + this.cur + " to " + ++this.cur + " towards " + this.destinations[0]
-		);
+		console.log(`Elevator ${this.number} is moving from ${this.cur} to ${(this.cur > this.destinations[0]) ? --this.cur : ++this.cur} towards ${this.destinations[0]}`);
 	}
 
 	wait(): void {
-		console.log(". . . Elevator " + this.number + " waiting on floor " + this.cur + " . . .");
+		console.log(`. . . Elevator ${this.number} waiting on floor ${this.cur} . . .`);
 	}
 
 }
@@ -204,8 +202,7 @@ class Elevator {
 	btnDest.addEventListener('click', ()=> eo.addRequest(<any>inpDest.value * 1));
 
 	btnBoth.addEventListener('click', () => {
-		eo.addRequest(<any>inpFloor.value * 1);//*1 is for coercion
-		eo.addRequest(<any>inpDest.value * 1);
+		eo.addRequest(<any>inpFloor.value * 1, <any>inpDest.value * 1);//*1 is for coercion
 	});
 
 	var eo = new ElevatorOperator(1);
